@@ -1,9 +1,11 @@
-﻿// Warhammer 40 000.cpp : Этот файл содержит функцию "main". Здесь начинается и заканчивается выполнение программы.
-//
-
-#include <iostream>
+﻿#include <iostream>
+#include <fstream>
 #include <vector>
+#include <string>
+#include <thread>
+#include <ctime>
 #include <random>
+
 
 using namespace std;
 
@@ -16,7 +18,6 @@ struct FVector
         return sqrt((X * X) + (Y * Y));
     }
 };//Назвал так-же,как в UE4
-
 class Unit {
 public:
     FVector Position;
@@ -35,6 +36,62 @@ public:
     }
 };
 
+vector<Unit> unit;
+
+std::ifstream::pos_type filesize(const char* filename)
+{
+    std::ifstream in(filename, std::ifstream::ate | std::ifstream::binary);
+    return in.tellg();
+}
+void SaveDataUnits() {
+    for (size_t i = 0; i < unit.size(); i++)
+    {
+
+        string info =
+            to_string(unit[i].Position.X)
+            + "\n"
+            + to_string(unit[i].Position.Y)
+            + "\n"
+            + to_string(unit[i].DirectionView.X)
+            + "\n"
+            + to_string(unit[i].DirectionView.Y)
+            + "\n"
+            + to_string(unit[i].AngleView)
+            + "\n"
+            + to_string(unit[i].DistanceView)
+            + "\n";
+
+        std::ofstream out;
+        out.open("InfoAboutUnits.txt", std::ios::app);
+        if (out.is_open())
+        {
+            out << unit[i].Position.X << " " << unit[i].Position.Y << " " << unit[i].DirectionView.X << " " << unit[i].DirectionView.Y << " " << unit[i].AngleView << " " << unit[i].DistanceView << std::endl;
+        }
+    }
+}
+void LoadDataUnits() {
+    float PosX;
+    float PosY;
+
+    float DirViewX;
+    float DirViewY;
+
+    float AngleView;
+    float Distance;
+
+    std::ifstream in("InfoAboutUnits.txt"); 
+    if (in.is_open())
+    {
+        while (in >> PosX >> PosY >> DirViewX >> DirViewY >> AngleView >> Distance)
+        {
+            unit.push_back(Unit(
+                { PosX, PosY },                //Position
+                { DirViewX, DirViewY },  //DirectionView
+                AngleView,                     //AngleView
+                Distance));                     //DistanceView));
+        }
+    }
+}
 bool CheckView(Unit unit, FVector targetPos) {
     FVector Vector =
     { targetPos.X - unit.Position.X,
@@ -57,8 +114,8 @@ bool CheckView(Unit unit, FVector targetPos) {
     }
     return false;
 }
-void Controller(vector<Unit> unitsForCheck) {
-    for (size_t i = 0; i < unitsForCheck.size(); i++)
+void Controller(vector<Unit> unitsForCheck,int start,int end) {
+    for (size_t i = start; i < end; i++)
     {
         int CountSeeUnit = 0;
         for (size_t j = 0; j < unitsForCheck.size(); j++)
@@ -70,8 +127,7 @@ void Controller(vector<Unit> unitsForCheck) {
         printf("Unit Number %i sees %i unit(s) \n", i, CountSeeUnit);
     }
 } //Адская машина,которая отвечает за проверку видимости других юнитиов для каждого юнита
-
-int main()
+void AddUnit()
 {
 #pragma region Fucking Rand in C++
     float someSeed = 0;
@@ -80,27 +136,6 @@ int main()
 #pragma endregion
 
 #pragma region Create unit
-    vector<Unit> unit;
-
-#pragma region Add your value
-    unit.push_back(Unit(
-        { 1,1 },   //Position
-        { 0,1 },  //DirectionView
-        135.5,  //AngleView
-        2));       //DistanceView
-
-    unit.push_back(Unit(
-        { 1,2 },   //Position
-        { 1,0 },  //DirectionView
-        135.5,  //AngleView
-        2));         //DistanceView
-
-    unit.push_back(Unit(
-        { -5,-1 },   //Position
-        { 0.707, 0.707 },  //DirectionView
-        135.5,  //AngleView
-        2));        //DistanceView
-#pragma endregion 
 
     //Add 10 000 units
     for (size_t i = 0; i < 10000; i++)
@@ -110,11 +145,31 @@ int main()
             { (float)dis(gen), (float)dis(gen) },  //DirectionView
             135.5,  //AngleView
             2));       //DistanceView));
-   }
+    }
 
 #pragma endregion
+}
 
-    Controller(unit);
-    //CheckView(unit1, unit2.Position);
+int main()
+{
+    float start_time = clock(); // начальное время
+
+    //Создаёт набор юнитов и сохраняет данные о них,если файл сохранения пустой.Иначе загружает из него данные о юнитах
+    if (filesize("InfoAboutUnits.txt") == 0) {
+        AddUnit();
+        SaveDataUnits();
+    }
+    else
+    {
+        LoadDataUnits();
+    }
+
+    Controller(unit,0,unit.size());
+
     std::cout << "Hello World!\n";
+
+    float end_time = clock(); // конечное время
+    float search_time = end_time - start_time; // искомое время
+
+    printf("%f", search_time);
 }

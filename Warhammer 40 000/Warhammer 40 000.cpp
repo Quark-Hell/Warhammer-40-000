@@ -69,7 +69,7 @@ public:
             );
     }
 };
-static vector<int> s;
+
 class QuadTree {
     int Capacity;
 
@@ -245,7 +245,7 @@ void Controller(int start, int end) {
     int CountSeeUnit = 0;
     for (size_t i = start; i < end; i++)
     {
-        Rectangle range = Rectangle(unit[i].Position.X, unit[i].Position.Y, 5, 5);
+        Rectangle range = Rectangle(unit[i].Position.X, unit[i].Position.Y, unit[i].DistanceView * 2, unit[i].DistanceView * 2);
 
         vector<Unit> unitInRangeView;
         quadTree.query(range, unitInRangeView);//Все юниты,которые находятся в радиусе обзора юнита

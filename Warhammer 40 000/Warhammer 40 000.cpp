@@ -114,13 +114,13 @@ bool CheckView(Unit unit, FVector targetPos) {
     }
     return false;
 }
-void Controller(vector<Unit> unitsForCheck,int start,int end) {
+void Controller(int start,int end) {
     for (size_t i = start; i < end; i++)
     {
         int CountSeeUnit = 0;
-        for (size_t j = 0; j < unitsForCheck.size(); j++)
+        for (size_t j = 0; j < unit.size(); j++)
         {
-            if (CheckView(unitsForCheck[i], unitsForCheck[j].Position)) {
+            if (CheckView(unit[i], unit[j].Position)) {
                 CountSeeUnit++;
             }
         }
@@ -164,9 +164,50 @@ int main()
         LoadDataUnits();
     }
 
-    Controller(unit,0,unit.size());
+    if (unit.size() < 2000) {
+        thread t1(Controller, 0, unit.size());
+        t1.join();
+    }
+    else if (unit.size() < 4000) {
+        thread t1(Controller, 0, unit.size() / 2);
+        thread t2(Controller, unit.size() / 2, unit.size());
 
-    std::cout << "Hello World!\n";
+        t1.join();
+        t2.join();
+    }
+    else if (unit.size() < 6000) {
+        thread t1(Controller, 0, unit.size() / 3);
+        thread t2(Controller, unit.size() / 3, unit.size() / 3 * 2);
+        thread t3(Controller, unit.size() / 3 * 2, unit.size());
+
+        t1.join();
+        t2.join();
+        t3.join();
+    }
+    else if (unit.size() < 8000) {
+        thread t1(Controller, 0, unit.size() / 4);
+        thread t2(Controller, unit.size() / 4, unit.size() / 4 *2);
+        thread t3(Controller, unit.size() / 4 * 2, unit.size() / 4 * 3);
+        thread t4(Controller, unit.size() / 4 * 3, unit.size());
+
+        t1.join();
+        t2.join();
+        t3.join();
+        t4.join();
+    }
+    else {
+        thread t1(Controller, 0,                           unit.size() / 5);
+        thread t2(Controller, unit.size() / 5,       unit.size() / 5 * 2);
+        thread t3(Controller, unit.size() / 5 * 2, unit.size() / 5 * 3);
+        thread t4(Controller, unit.size() / 5 * 3, unit.size() / 5 * 4);
+        thread t5(Controller, unit.size() / 5 * 4, unit.size());
+
+        t1.join();
+        t2.join();
+        t3.join();
+        t4.join();
+        t5.join();
+    }
 
     float end_time = clock(); // конечное время
     float search_time = end_time - start_time; // искомое время

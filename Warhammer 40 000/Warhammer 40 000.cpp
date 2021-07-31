@@ -6,7 +6,6 @@
 #include <ctime>
 #include <random>
 
-
 using namespace std;
 
 struct FVector
@@ -14,10 +13,14 @@ struct FVector
     float X;
     float Y;
 
+    /// <summary>
+    /// Get lenght of vector
+    /// </summary>
+    /// <returns></returns>
     float magnitude() {
         return sqrt((X * X) + (Y * Y));
     }
-};//Назвал так-же,как в UE4
+};// Назвал так-же,как в UE4
 class Unit {
 public:
     FVector Position;
@@ -38,6 +41,11 @@ public:
 
 vector<Unit> unit;
 
+/// <summary>
+/// get size of file
+/// </summary>
+/// <param name="filename"></param>
+/// <returns></returns>
 std::ifstream::pos_type filesize(const char* filename)
 {
     std::ifstream in(filename, std::ifstream::ate | std::ifstream::binary);
@@ -92,17 +100,23 @@ void LoadDataUnits() {
         }
     }
 }
+/// <summary>
+/// Checks if the target is within the unit's scope.
+/// </summary>
+/// <param name="unit"></param>
+/// <param name="targetPos"></param>
+/// <returns></returns>
 bool CheckView(Unit unit, FVector targetPos) {
     FVector Vector =
     { targetPos.X - unit.Position.X,
-      targetPos.Y - unit.Position.Y };//Вычисление вектора до другого юнита
+      targetPos.Y - unit.Position.Y };// Computing a vector to another unit
 
-    if (Vector.magnitude() <= unit.DistanceView) { //Вычисление дистанции до цели ради преждевременного отсечения целей,которые выходят за пределы видимости
+    if (Vector.magnitude() <= unit.DistanceView) { // Вычисление дистанции до цели ради преждевременного отсечения целей,которые выходят за пределы видимости
 #pragma region Calculacte angle between 2 vectors
         float dot = (unit.DirectionView.X * Vector.X) + (unit.DirectionView.Y * Vector.Y);
         float det = (unit.DirectionView.X * Vector.Y) - (unit.DirectionView.Y * Vector.X);
 
-        float angle = atan2(det, dot) * (180.0 / 3.141592653589793238463);//вычисление угла между векторами в радианах и последующяя конвертация в градусы
+        float angle = atan2(det, dot) * (180.0 / 3.141592653589793238463);// Calculating the angle between vectors in radians and then converting to degrees
 #pragma endregion
         if (angle < unit.AngleView / 2) {
             return true;
@@ -114,6 +128,11 @@ bool CheckView(Unit unit, FVector targetPos) {
     }
     return false;
 }
+/// <summary>
+/// Отвечает за проверку видимости других юнитиов для каждого юнита
+/// </summary>
+/// <param name="start"></param>
+/// <param name="end"></param>
 void Controller(int start,int end) {
     for (size_t i = start; i < end; i++)
     {
@@ -126,7 +145,7 @@ void Controller(int start,int end) {
         }
         printf("Unit Number %i sees %i unit(s) \n", i, CountSeeUnit);
     }
-} //Адская машина,которая отвечает за проверку видимости других юнитиов для каждого юнита
+}
 void AddUnit()
 {
 #pragma region Fucking Rand in C++
@@ -141,10 +160,10 @@ void AddUnit()
     for (size_t i = 0; i < 10000; i++)
     {
         unit.push_back(Unit(
-            { (float)dis(gen), (float)dis(gen) },   //Position
-            { (float)dis(gen), (float)dis(gen) },  //DirectionView
-            135.5,  //AngleView
-            2));       //DistanceView));
+            { (float)dis(gen), (float)dis(gen) },    // Position
+            { (float)dis(gen), (float)dis(gen) },    // DirectionView
+            135.5,                                               // AngleView
+            2));                                                   // DistanceView;
     }
 
 #pragma endregion
@@ -152,9 +171,10 @@ void AddUnit()
 
 int main()
 {
-    float start_time = clock(); // начальное время
+    // Stopwatch :)
+    float start_time = clock(); //Start time
 
-    //Создаёт набор юнитов и сохраняет данные о них,если файл сохранения пустой.Иначе загружает из него данные о юнитах
+    // Creates a set of units and saves data about them if the save file is empty, otherwise loads data about units from it
     if (filesize("InfoAboutUnits.txt") == 0) {
         AddUnit();
         SaveDataUnits();
@@ -209,8 +229,8 @@ int main()
         t5.join();
     }
 
-    float end_time = clock(); // конечное время
-    float search_time = end_time - start_time; // искомое время
+    float end_time = clock(); // End Time
+    float search_time = end_time - start_time; // Search Time
 
     printf("%f", search_time);
 }

@@ -118,7 +118,7 @@ bool CheckView(Unit unit, FVector targetPos) {
 
         float angle = atan2(det, dot) * (180.0 / 3.141592653589793238463);// Calculating the angle between vectors in radians and then converting to degrees
 #pragma endregion
-        if (angle < unit.AngleView / 2) {
+        if (angle > -unit.AngleView / 2 && angle < unit.AngleView / 2) {
             return true;
         }
         else
@@ -139,7 +139,7 @@ void Controller(int start,int end) {
         int CountSeeUnit = 0;
         for (size_t j = 0; j < unit.size(); j++)
         {
-            if (CheckView(unit[i], unit[j].Position)) {
+            if (CheckView(unit[i], unit[j].Position) && i != j) {
                 CountSeeUnit++;
             }
         }

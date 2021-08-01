@@ -253,11 +253,11 @@ void Controller(int start, int end) {
         CountSeeUnit = 0;
         for (size_t j = 0; j < unitInRangeView.size(); j++)
         {
-            if (CheckView(unit[i], unitInRangeView[j].Position) && i != j) {
+            if (CheckView(unit[i], unitInRangeView[j].Position)) {
                 CountSeeUnit++;
             }
         }
-        printf("Unit Number %i sees %i unit(s) \n", i, CountSeeUnit);
+        printf("Unit Number %i sees %i unit(s) \n", i, CountSeeUnit - 1);
     }
 } //Адская машина,которая отвечает за проверку видимости других юнитиов для каждого юнита
 void AddUnit()

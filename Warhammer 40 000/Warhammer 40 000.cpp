@@ -41,17 +41,25 @@ public:
     }
 };
 
+/// <summary>
+/// Очень важно!!!Перечесление идёт с Y!!!.Поэтому поле разделяется не на XY,а на YX!!!
+/// </summary>
 class LogicSegmentTree {
 public:
-    vector<vector<Unit>> Container;
+    vector<vector<vector<Unit>>> Container;
 
 
-    void SetupSizeGameMap(int Height) {
-        Container.resize(Height);
+    void SetupSizeGameMap(FVector SizeXY) {
+        Container.resize(SizeXY.Y);
+        for (size_t i = 0; i < Container.size(); i++)
+        {
+            Container[i].resize(SizeXY.X);
+        }
     }
     void Insert(Unit object) {
-        int index = (int)object.Position.Y;
-        Container[index].push_back(object);
+        int Y = (int)object.Position.Y;
+        int X = (int)object.Position.X;
+        Container[Y][X].push_back(object);
     }
 };
 
@@ -106,7 +114,7 @@ void LoadDataUnits() {
     float AngleView;
     float Distance;
 
-    std::ifstream in("InfoAboutUnits.txt"); 
+    std::ifstream in("InfoAboutUnits.txt");
     if (in.is_open())
     {
         while (in >> PosX >> PosY >> DirViewX >> DirViewY >> AngleView >> Distance)
@@ -137,7 +145,7 @@ bool CheckView(Unit unit, FVector targetPos) {
 
         float angle = atan2(det, dot) * (180.0 / 3.141592653589793238463);// Calculating the angle between vectors in radians and then converting to degrees
 #pragma endregion
-        if (angle < unit.AngleView / 2) {
+        if (angle > -unit.AngleView / 2 && angle < unit.AngleView / 2) {
             return true;
         }
         else
@@ -152,27 +160,45 @@ bool CheckView(Unit unit, FVector targetPos) {
 /// </summary>
 /// <param name="start"></param>
 /// <param name="end"></param>
-void Controller(int start,int end) {
+void Controller(int start, int end) {
 
     for (size_t i = start; i < end; i++)
     {
         int CountSeeUnit = 0;
-        for (int t = -unit[i].DistanceView; t <= unit[i].DistanceView; t++)
+
+        int YAreaForCheck;
+        int XAreaForCheck;
+
+        if (i == 1) {
+            printf("h");
+        }
+
+        for (int Y = -unit[i].DistanceView; Y <= unit[i].DistanceView; Y++)
         {
-            int AreaForCheck = (int)unit[i].Position.Y + t;
-            if (AreaForCheck < 0 || AreaForCheck >= SegmentTree->Container.size()) {
-            }
-            else
-            {
-                for (size_t j = 0; j < SegmentTree->Container[AreaForCheck].size(); j++)
+            YAreaForCheck = (int)unit[i].Position.Y + Y;
+
+            if (YAreaForCheck >= 0 && YAreaForCheck < SegmentTree->Container.size()) {
+                for (int X = -unit[i].DistanceView; X <= unit[i].DistanceView; X++)
                 {
-                    if (CheckView(unit[i], SegmentTree->Container[AreaForCheck][j].Position)) {
-                        CountSeeUnit++;
+                    XAreaForCheck = (int)unit[i].Position.X + X;
+                    if (XAreaForCheck >= 0 && XAreaForCheck < SegmentTree->Container[YAreaForCheck].size())
+                    {
+                        for (size_t t = 0; t < SegmentTree->Container[YAreaForCheck][XAreaForCheck].size(); t++)
+                        {
+                            //if (YAreaForCheck == 11 && XAreaForCheck == 16 && t == 10)
+                            //{
+                                //if (CheckView(unit[i], SegmentTree->Container[YAreaForCheck][XAreaForCheck][t].Position)) {}
+                            //}
+
+                            if (CheckView(unit[i], SegmentTree->Container[YAreaForCheck][XAreaForCheck][t].Position)) {
+                                CountSeeUnit++;
+                            }
+                        }
                     }
                 }
-            }           
+            }
         }
-        printf("Unit Number %i sees %i unit(s) \n", i, CountSeeUnit);
+        printf("Unit Number %i sees %i unit(s) \n", i, CountSeeUnit - 1);
     }
 }
 void AddUnit()
@@ -198,7 +224,7 @@ void AddUnit()
 #pragma endregion
 }
 
-void SetupGameSettings(int HeightMap) {
+void SetupGameSettings(FVector HeightMap) {
     SegmentTree->SetupSizeGameMap(HeightMap);
     for (size_t i = 0; i < unit.size(); i++)
     {
@@ -221,10 +247,10 @@ int main()
     {
         LoadDataUnits();
     }
-    SetupGameSettings(21);
+    SetupGameSettings({ 21,21 });
     Controller(0, unit.size());
 
-/*
+    /*
     if (unit.size() < 2000) {
         thread t1(Controller, 0, unit.size());
         t1.join();
@@ -269,7 +295,8 @@ int main()
         t4.join();
         t5.join();
     }
-*/
+    */
+
     float end_time = clock(); // End Time
     float search_time = end_time - start_time; // Search Time
 

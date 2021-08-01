@@ -169,10 +169,6 @@ void Controller(int start, int end) {
         int YAreaForCheck;
         int XAreaForCheck;
 
-        if (i == 1) {
-            printf("h");
-        }
-
         for (int Y = -unit[i].DistanceView; Y <= unit[i].DistanceView; Y++)
         {
             YAreaForCheck = (int)unit[i].Position.Y + Y;
@@ -185,11 +181,6 @@ void Controller(int start, int end) {
                     {
                         for (size_t t = 0; t < SegmentTree->Container[YAreaForCheck][XAreaForCheck].size(); t++)
                         {
-                            //if (YAreaForCheck == 11 && XAreaForCheck == 16 && t == 10)
-                            //{
-                                //if (CheckView(unit[i], SegmentTree->Container[YAreaForCheck][XAreaForCheck][t].Position)) {}
-                            //}
-
                             if (CheckView(unit[i], SegmentTree->Container[YAreaForCheck][XAreaForCheck][t].Position)) {
                                 CountSeeUnit++;
                             }
@@ -248,9 +239,8 @@ int main()
         LoadDataUnits();
     }
     SetupGameSettings({ 21,21 });
-    Controller(0, unit.size());
+    //Controller(0, unit.size());
 
-    /*
     if (unit.size() < 2000) {
         thread t1(Controller, 0, unit.size());
         t1.join();
@@ -295,7 +285,6 @@ int main()
         t4.join();
         t5.join();
     }
-    */
 
     float end_time = clock(); // End Time
     float search_time = end_time - start_time; // Search Time

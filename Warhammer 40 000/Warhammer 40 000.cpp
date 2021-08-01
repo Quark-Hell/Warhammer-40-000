@@ -5,6 +5,8 @@
 #include <thread>
 #include <ctime>
 #include <random>
+#include <stdio.h>
+#include <stdlib.h>
 
 using namespace std;
 
@@ -39,7 +41,24 @@ public:
     }
 };
 
+class LogicSegmentTree {
+public:
+    vector<vector<Unit>> Container;
+
+
+    void SetupSizeGameMap(int Height) {
+        Container.resize(Height);
+    }
+    void Insert(Unit object) {
+        int index = (int)object.Position.Y;
+        Container[index].push_back(object);
+    }
+};
+
+
+
 vector<Unit> unit;
+LogicSegmentTree* SegmentTree = new LogicSegmentTree;
 
 /// <summary>
 /// get size of file
@@ -134,14 +153,24 @@ bool CheckView(Unit unit, FVector targetPos) {
 /// <param name="start"></param>
 /// <param name="end"></param>
 void Controller(int start,int end) {
+
     for (size_t i = start; i < end; i++)
     {
         int CountSeeUnit = 0;
-        for (size_t j = 0; j < unit.size(); j++)
+        for (int t = -unit[i].DistanceView; t <= unit[i].DistanceView; t++)
         {
-            if (CheckView(unit[i], unit[j].Position)) {
-                CountSeeUnit++;
+            int AreaForCheck = (int)unit[i].Position.Y + t;
+            if (AreaForCheck < 0 || AreaForCheck >= SegmentTree->Container.size()) {
             }
+            else
+            {
+                for (size_t j = 0; j < SegmentTree->Container[AreaForCheck].size(); j++)
+                {
+                    if (CheckView(unit[i], SegmentTree->Container[AreaForCheck][j].Position)) {
+                        CountSeeUnit++;
+                    }
+                }
+            }           
         }
         printf("Unit Number %i sees %i unit(s) \n", i, CountSeeUnit);
     }
@@ -151,7 +180,7 @@ void AddUnit()
 #pragma region Fucking Rand in C++
     float someSeed = 0;
     mt19937 gen(someSeed);
-    uniform_int_distribution<int> dis(-9.0, 9.0);
+    uniform_int_distribution<int> dis(0, 20.0);
 #pragma endregion
 
 #pragma region Create unit
@@ -169,6 +198,15 @@ void AddUnit()
 #pragma endregion
 }
 
+void SetupGameSettings(int HeightMap) {
+    SegmentTree->SetupSizeGameMap(HeightMap);
+    for (size_t i = 0; i < unit.size(); i++)
+    {
+        SegmentTree->Insert(unit[i]);
+    }
+
+}
+
 int main()
 {
     // Stopwatch :)
@@ -183,7 +221,10 @@ int main()
     {
         LoadDataUnits();
     }
+    SetupGameSettings(21);
+    Controller(0, unit.size());
 
+/*
     if (unit.size() < 2000) {
         thread t1(Controller, 0, unit.size());
         t1.join();
@@ -228,7 +269,7 @@ int main()
         t4.join();
         t5.join();
     }
-
+*/
     float end_time = clock(); // End Time
     float search_time = end_time - start_time; // Search Time
 

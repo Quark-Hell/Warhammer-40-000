@@ -231,7 +231,7 @@ bool CheckView(Unit unit, FVector targetPos) {
 
         float angle = atan2(det, dot) * (180.0 / 3.141592653589793238463);//вычисление угла между векторами в радианах и последующяя конвертация в градусы
 #pragma endregion
-        if (angle < unit.AngleView / 2) {
+        if (angle > -unit.AngleView / 2 && angle < unit.AngleView / 2) {
             return true;
         }
         else
@@ -253,11 +253,11 @@ void Controller(int start, int end) {
         CountSeeUnit = 0;
         for (size_t j = 0; j < unitInRangeView.size(); j++)
         {
-            //if (CheckView(unit[i], unitInRangeView[j].Position)) {
-                //CountSeeUnit++;
-            //}
+            if (CheckView(unit[i], unitInRangeView[j].Position) && i != j) {
+                CountSeeUnit++;
+            }
         }
-        //printf("Unit Number %i sees %i unit(s) \n", i, CountSeeUnit);
+        printf("Unit Number %i sees %i unit(s) \n", i, CountSeeUnit);
     }
 } //Адская машина,которая отвечает за проверку видимости других юнитиов для каждого юнита
 void AddUnit()
